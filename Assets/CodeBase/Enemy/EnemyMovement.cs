@@ -5,28 +5,66 @@ namespace CodeBase.Enemy
 {
     public class EnemyMovement : MonoBehaviour
     {
-        public float moveSpeed = 3f;
+        [SerializeField] private float _moveSpeed = 3f;
+        [SerializeField] private float _stoppingDistance = 2f;
 
-        private Transform player;
-        private Rigidbody2D rb;
+        private Transform _player;
+        private Rigidbody2D _rigidbody2D;
 
         private void Start()
         {
-            player = FindObjectOfType<PlayerMovement>().transform;
-            rb = GetComponent<Rigidbody2D>();
+            _player = FindObjectOfType<PlayerMove>().transform;
+            _rigidbody2D = GetComponent<Rigidbody2D>();
         }
 
         private void Update()
         {
-            // Обчислюємо вектор спрямування до гравця
-            Vector2 direction = (player.position - transform.position).normalized;
+            if (_player.transform != null)
+            {
+                var direction = CalculateDirection();
+        
+                var distance = CalculateDistance();
 
-            // Рухаємо ворога в напрямку гравця
-            rb.velocity = direction * moveSpeed;
+                if (distance <= _stoppingDistance)
+                {
+                    StopMovement();
+                }
+                else
+                {
+                    Move(direction);
+                }
 
-            // Обертання ворога в напрямку руху
+                Rotate(direction);
+            }
+        }
+
+        private Vector2 CalculateDirection()
+        {
+            Vector2 direction = (_player.position - transform.position).normalized;
+            return direction;
+        }
+
+        private void Rotate(Vector2 direction)
+        {
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            rb.rotation = angle;
+            _rigidbody2D.rotation = angle;
+        }
+
+        private void Move(Vector2 direction)
+        {
+            _rigidbody2D.velocity = direction * _moveSpeed;
+        }
+
+        private float CalculateDistance()
+        {
+            float distance = Vector2.Distance(transform.position, _player.position);
+            return distance;
+        }
+
+        private void StopMovement()
+        {
+            _rigidbody2D.velocity = Vector2.zero;
         }
     }
+
 }

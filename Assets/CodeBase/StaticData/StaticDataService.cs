@@ -1,21 +1,24 @@
-﻿namespace CodeBase.StaticData
+﻿using System.Collections.Generic;
+using System.Linq;
+using CodeBase.Enemy;
+using CodeBase.Player;
+using UnityEngine;
+
+namespace CodeBase.StaticData
 {
     public class StaticDataService : IStaticDataService
     {
-        // private Dictionary<ItemTypeId, BuildingStaticData> _producedResources;
-        //
-        // public void LoadResources()
-        // {
-        //     _producedResources = Resources.LoadAll<BuildingStaticData>("StaticData/Buildings")
-        //         .ToDictionary(x => x.ProducedTypeId, x => x);
-        // }
-        //
-        // public BuildingStaticData ForProducedItems(ItemTypeId typeId) => 
-        //     _producedResources.TryGetValue(typeId, out BuildingStaticData staticData) ? staticData : null;
+        private Dictionary<EnemyTypeId, EnemyStaticData> _enemyes;
+
+        
         public void LoadResources()
         {
-           
-            
+            _enemyes = Resources.LoadAll<EnemyStaticData>("StaticData/Enemy")
+                .ToDictionary(x => x.EnemyTypeId, x => x);
         }
+        
+        public EnemyStaticData ForEnemy(EnemyTypeId typeId) => 
+            _enemyes.TryGetValue(typeId, out EnemyStaticData staticData) ? staticData : null;
+        
     }
 }

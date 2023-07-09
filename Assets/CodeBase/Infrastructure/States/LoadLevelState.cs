@@ -6,8 +6,6 @@ namespace CodeBase.Infrastructure.States
 {
     public class LoadLevelState : IPayloadedState<string>
     {
-        private const string InitialPointTag = "PlayerInitialPoint";
-        
         private readonly GameStateMachine _stateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly LoadingCurtain _curtain;
@@ -16,8 +14,8 @@ namespace CodeBase.Infrastructure.States
         public LoadLevelState(GameStateMachine stateMachine, SceneLoader sceneLoader, LoadingCurtain curtain, IGameFactory gameFactory)
         {
             _stateMachine = stateMachine;
-            _curtain = curtain;
             _sceneLoader = sceneLoader;
+            _curtain = curtain;
             _gameFactory = gameFactory;
         }
 
@@ -27,24 +25,41 @@ namespace CodeBase.Infrastructure.States
             _sceneLoader.Load(sceneName, OnLoaded);
         }
 
-        public void Exit()
-        {
-            _curtain.Hide();
-        }
+        public void Exit() => _curtain.Hide();
 
         private void OnLoaded()
         {
-            GameObject player = _gameFactory.CreatePlayer(GameObject.FindWithTag(InitialPointTag));
+            InitCanvas();
+            InitBulletPool();
+            GameObject player = InitPlayer();
+            InitEnemySpawner();
             
-            Debug.Log($"{player.scene.buildIndex}");
-            //_gameFactory.CreateHud();
-            
-            //CameraFollow(player);
-            
+            CameraFollow(player);
             _stateMachine.Enter<GameLoopState>();
         }
 
-        // private void CameraFollow(GameObject player) => 
-        //     Camera.main.GetComponent<CameraFollow>().Follow(player);
+        private void InitBulletPool()
+        {
+            _gameFactory.CreateBulletPool();
+        }
+
+        private void InitEnemySpawner()
+        {
+            _gameFactory.CreateEnemySpawner();
+        }
+        
+        private void InitCanvas()
+        {
+            _gameFactory.CreateCanvas();
+        }
+
+        private GameObject InitPlayer()
+        {
+            GameObject player = _gameFactory.CreatePlayer();
+            return player;
+        }
+
+        private void CameraFollow(GameObject player) => 
+            UnityEngine.Camera.main.GetComponent<CameraFollow>().Follow(player);
     }
 }

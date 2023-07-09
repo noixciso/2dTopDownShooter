@@ -1,5 +1,8 @@
-﻿using CodeBase.Infrastructure.AssetManagement;
+﻿using CodeBase.Enemy;
+using CodeBase.Infrastructure.AssetManagement;
+using CodeBase.Interfaces;
 using CodeBase.StaticData;
+using CodeBase.Weapon;
 using UnityEngine;
 
 namespace CodeBase.Infrastructure.Factory
@@ -15,22 +18,54 @@ namespace CodeBase.Infrastructure.Factory
             _staticData = staticData;
         }
     
-        public GameObject CreateEnemy()
+        public GameObject CreateEnemy(EnemyTypeId enemyTypeId)
         {
-            GameObject enemyPrefab = _assets.Instantiate(AssetPath.EnemyPrefabPath);
+            EnemyStaticData enemyData = _staticData.ForEnemy(enemyTypeId);
+
+            GameObject enemy = Object.Instantiate(enemyData.Prefab);
+
+            IHealth health = enemy.GetComponent<IHealth>();
+            health.Current = enemyData.Health;
+            health.Max = enemyData.Health;
+
+            if (enemyTypeId == EnemyTypeId.WithWeapon)
+            {
+                enemy.GetComponent<EnemyWeapon>().Damage = enemyData.Damage;
+            }
+            else if (enemyTypeId == EnemyTypeId.WithoutWeapon)
+            {
+                enemy.GetComponent<EnemyMleeAttack>().Damage = enemyData.Damage;
+            }
             
-            // Додаткові дії при створенні ворога, якщо потрібно
-            
-            return enemyPrefab;
+            return enemy;
         }
-        
-        public GameObject CreatePlayer(GameObject findWithTag)
+
+        public GameObject CreatePlayer()
         {
-            GameObject player = _assets.Instantiate(AssetPath.PlayerPrefabPath);
-            player.transform.position = Vector3.zero;
+            GameObject player = Object.Instantiate(_assets.Load(AssetPath.PlayerPrefabPath));
 
             return player;
         }
+
+        public GameObject CreateEnemySpawner()
+        {
+            GameObject spawner = Object.Instantiate(_assets.Load(AssetPath.EnemySpawnerPrefabPath));
+
+            return spawner;
+        }
         
+        public GameObject CreateCanvas()
+        {
+            GameObject canvas = Object.Instantiate(_assets.Load(AssetPath.CanvasPrefabPath));
+
+            return canvas;
+        }
+
+        public GameObject CreateBulletPool()
+        {
+            GameObject bulletPool = Object.Instantiate(_assets.Load(AssetPath.BulletPoolPrefabPath));
+
+            return bulletPool;
+        }
     }
 }

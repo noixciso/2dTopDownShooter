@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using CodeBase.Infrastructure;
 using CodeBase.Infrastructure.Factory;
+using CodeBase.StaticData;
 using UnityEngine;
 
 namespace CodeBase.Enemy
@@ -8,42 +8,40 @@ namespace CodeBase.Enemy
     public class EnemyPool
     {
         private List<GameObject> _pool = new List<GameObject>();
-        private GameObject _enemyPrefab;
+        private IGameFactory _gameFactory;
+        private EnemySpawner _enemySpawner;
     
-        public EnemyPool(GameFactory gameFactory, int initialPoolSize)
+        public EnemyPool(IGameFactory gameFactory, EnemySpawner enemySpawner, int initialPoolSize)
         {
-            this._enemyPrefab = gameFactory.CreateEnemy();
+            _gameFactory = gameFactory;
+            _enemySpawner = enemySpawner;
         
             for (int i = 0; i < initialPoolSize; i++)
             {
-                AddNewEnemy();
+                CreateNewEnemy(_gameFactory, _enemySpawner.EnemyTypes[Random.Range(0, _enemySpawner.EnemyTypes.Count)]);
             }
         }
     
-        public GameObject GetOrAdd()
+        public GameObject GetOrCreate(EnemyTypeId enemyType)
         {
-            GameObject obj = _pool.Find(o => !o.activeSelf);
+            GameObject enemy = _pool.Find(o => !o.activeSelf);
         
-            if (obj == null)
+            if (enemy == null)
             {
-                obj = AddNewEnemy();
+                enemy = CreateNewEnemy(_gameFactory, enemyType);
             }
         
-            obj.SetActive(true);
-            return obj;
+            enemy.SetActive(true);
+            return enemy;
         }
-    
-        public void Release(GameObject obj)
+
+        private GameObject CreateNewEnemy(IGameFactory gameFactory, EnemyTypeId enemyTypeId)
         {
-            obj.SetActive(false);
-        }
-    
-        private GameObject AddNewEnemy()
-        {
-            GameObject newObj = Object.Instantiate(_enemyPrefab);
-            newObj.SetActive(false);
-            _pool.Add(newObj);
-            return newObj;
+            GameObject newEnemy = gameFactory.CreateEnemy(enemyTypeId);
+            newEnemy.transform.SetParent(_enemySpawner.transform);
+            newEnemy.SetActive(false);
+            _pool.Add(newEnemy);
+            return newEnemy;
         }
     }
 }

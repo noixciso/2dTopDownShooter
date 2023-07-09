@@ -5,7 +5,7 @@ using CodeBase.Infrastructure.Services;
 
 namespace CodeBase.Infrastructure.States
 {
-    public class GameStateMachine
+    public class GameStateMachine : IGameStateMachine
     {
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
@@ -42,5 +42,11 @@ namespace CodeBase.Infrastructure.States
 
         private TState GetState<TState>() where TState : class, IExitableState => 
             _states[typeof(TState)] as TState;
+    }
+
+    public interface IGameStateMachine : IService
+    {
+        void Enter<TState>() where TState : class, IState;
+        void Enter<TState, TPayload>(TPayload payload) where TState : class, IPayloadedState<TPayload>;
     }
 }

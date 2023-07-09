@@ -1,11 +1,11 @@
-﻿using CodeBase.Infrastructure.States;
+﻿using CodeBase.Infrastructure.Services;
+using CodeBase.Infrastructure.States;
 using UnityEngine;
 
 namespace CodeBase.Infrastructure.AssetManagement
 {
     public interface IAssetProvider : IService
     {
-        GameObject Instantiate(string path);
-        GameObject Instantiate(string path, Vector3 transformPosition);
+        GameObject Load(string path);
     }
 }
